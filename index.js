@@ -1,12 +1,18 @@
 import express from "express";
 import axios from "axios";
 import cors from "cors";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // ─── Utilidad interna ────────────────────────────────────────────────────────
 
@@ -102,17 +108,9 @@ app.get("/ping", (req, res) => {
   res.json({ status: "ok", message: "FrikiTube API is alive 🎵" });
 });
 
-// ─── Root ────────────────────────────────────────────────────────────────────
+// ─── Root → página de docs ───────────────────────────────────────────────────
 app.get("/", (req, res) => {
-  res.json({
-    name: "FrikiTube API",
-    version: "1.0.0",
-    endpoints: [
-      { method: "POST", path: "/api/ytmp3", desc: "Descargar audio MP3" },
-      { method: "POST", path: "/api/ytmp4", desc: "Descargar video MP4" },
-      { method: "GET",  path: "/ping",      desc: "Health check" },
-    ],
-  });
+  res.sendFile(join(__dirname, "index.html"));
 });
 
 // ─── Start ───────────────────────────────────────────────────────────────────
