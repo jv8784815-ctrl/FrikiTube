@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FrikiTube API — Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #f8f7f4;
+  --off: #eeece8;
+  --light: #dddbd5;
+  --mid: #a09e98;
+  --dark: #2a2926;
+  --black: #111110;
+  --ink: #1a1917;
+  --line: #d4d2cc;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--white);
+  color: var(--ink);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--black);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease, width 0.2s, height 0.2s;
+  transform: translate(-50%, -50%);
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid var(--black);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), opacity 0.3s;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+}
+
+/* NOISE TEXTURE */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(248,247,244,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  padding: 0 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--black);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--black); }
+
+/* HERO */
+.hero {
+  padding: 140px 48px 80px;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: end;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-label::before {
+  content: '';
+  width: 32px; height: 1px;
+  background: var(--mid);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 6vw, 84px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  color: var(--black);
+}
+h1 em {
+  font-style: italic;
+  font-weight: 400;
+}
+
+.hero-desc {
+  font-size: 15px;
+  color: var(--mid);
+  line-height: 1.7;
+  max-width: 340px;
+  margin-top: 28px;
+}
+
+.hero-right {
+  padding-bottom: 8px;
+}
+
+.hero-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.hero-stat {
+  background: var(--white);
+  padding: 24px 20px;
+}
+.hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.hero-stat-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+/* LAYOUT */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+/* INTRO SECTION */
+.section-intro {
+  padding: 80px 0 60px;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.section-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 100px;
+  font-weight: 900;
+  color: var(--off);
+  line-height: 1;
+  letter-spacing: -4px;
+  user-select: none;
+  position: sticky;
+  top: 80px;
+}
+
+.section-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  color: var(--black);
+  margin-bottom: 20px;
+  line-height: 1.1;
+}
+.section-content h2 em { font-style: italic; font-weight: 400; }
+
+.lead {
+  font-size: 16px;
+  color: var(--dark);
+  line-height: 1.8;
+  margin-bottom: 24px;
+  max-width: 580px;
+}
+
+.base-url-box {
+  background: var(--black);
+  color: var(--white);
+  padding: 16px 22px;
+  border-radius: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+  max-width: 480px;
+}
+.base-url-box .label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  flex-shrink: 0;
+}
+.base-url-box .url { color: #fff; }
+
+/* ENDPOINT SECTIONS */
+.ep-section {
+  padding: 80px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 60px;
+}
+
+.ep-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.method-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  padding: 5px 14px;
+  border: 1.5px solid var(--black);
+  color: var(--black);
+  text-transform: uppercase;
+}
+
+.ep-path {
+  font-family: 'DM Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--black);
+  letter-spacing: -0.5px;
+}
+
+.ep-desc {
+  font-size: 14px;
+  color: var(--mid);
+  margin-bottom: 36px;
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+/* PARAMS TABLE */
+.params-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 12px;
+}
+
+.params-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 40px;
+}
+.params-table thead tr {
+  border-bottom: 1.5px solid var(--black);
+}
+.params-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--mid);
+  padding: 8px 12px 10px 0;
+  text-align: left;
+}
+.params-table td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.params-table td:first-child {
+  font-family: 'DM Mono', monospace;
+  color: var(--black);
+  font-size: 13px;
+}
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.tag-req { border: 1px solid var(--black); color: var(--black); }
+.tag-opt { border: 1px solid var(--light); color: var(--mid); }
+.values {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--mid);
+  margin-top: 4px;
+}
+
+/* CODE BLOCKS */
+.code-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 1px;
+}
+.code-group + .code-single {
+  margin-top: 0;
+}
+
+.code-panel {
+  background: var(--white);
+  position: relative;
+}
+.code-panel-head {
+  background: var(--black);
+  color: var(--mid);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.code-panel-head span { color: var(--white); }
+
+.code-body {
+  padding: 20px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+  background: #fafaf8;
+}
+
+.code-single {
+  border: 1px solid var(--line);
+  margin-bottom: 32px;
+}
+.code-single .code-body { background: #fafaf8; }
+
+.copy-btn {
+  background: none;
+  border: 1px solid #444;
+  color: var(--mid);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  cursor: none;
+  transition: all 0.2s;
+}
+.copy-btn:hover { border-color: #fff; color: #fff; }
+.copy-btn.copied { border-color: var(--mid); color: var(--mid); }
+
+/* SYNTAX */
+.s-key   { color: #1a1917; font-weight: 500; }
+.s-str   { color: #555; }
+.s-num   { color: #888; }
+.s-kw    { color: #111; font-style: italic; }
+.s-fn    { color: #333; }
+.s-cm    { color: #bbb; font-style: italic; }
+.s-prop  { color: #444; }
+.s-bool  { color: #666; font-style: italic; }
+
+/* JSON RESPONSE */
+.json-resp {
+  border: 1px solid var(--line);
+  margin-top: 0;
+  margin-bottom: 32px;
+}
+.json-resp-head {
+  background: var(--off);
+  border-bottom: 1px solid var(--line);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.json-body {
+  padding: 20px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  background: var(--white);
+  overflow-x: auto;
+}
+.json-ok { color: #3a3a3a; }
+
+.resp-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 20px;
+}
+.resp-field {
+  background: var(--white);
+  padding: 16px 18px;
+}
+.rf-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--black);
+  margin-bottom: 4px;
+}
+.rf-type {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--mid);
+  margin-bottom: 4px;
+}
+.rf-desc { font-size: 11px; color: var(--mid); }
+
+/* TEST SECTION */
+.test-section {
+  padding: 80px 0;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 60px;
+}
+
+.test-box {
+  border: 1.5px solid var(--black);
+  padding: 28px;
+  max-width: 560px;
+}
+
+.test-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.test-box p {
+  font-size: 13px;
+  color: var(--mid);
+  margin-bottom: 20px;
+}
+
+.test-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-bottom: 1.5px solid var(--black);
+  padding: 10px 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  background: transparent;
+  outline: none;
+  color: var(--black);
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.test-input::placeholder { color: var(--light); }
+.test-input:focus { border-bottom-color: var(--black); }
+
+.test-btn {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  cursor: none;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.test-btn:hover { background: var(--dark); }
+.test-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+.test-result {
+  display: none;
+  margin-top: 16px;
+  padding: 14px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  animation: fadeUp 0.3s ease;
+}
+.test-result.ok { border: 1px solid var(--black); background: var(--off); }
+.test-result.err { border: 1px solid #bbb; background: #fafafa; color: #999; }
+.test-result.show { display: block; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* FOOTER */
+footer {
+  border-top: 1.5px solid var(--black);
+  padding: 32px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--mid);
+  font-family: 'DM Mono', monospace;
+}
+footer strong { color: var(--black); font-weight: 500; }
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 32px 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; gap: 40px; }
+  .container { padding: 0 24px; }
+  .section-intro, .ep-section, .test-section { grid-template-columns: 1fr; gap: 24px; }
+  .section-num { font-size: 60px; position: static; }
+  .code-group { grid-template-columns: 1fr; }
+  h1 { font-size: 52px; letter-spacing: -2px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">FrikiTube</a>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#ytmp3">ytmp3</a></li>
+    <li><a href="#ytmp4">ytmp4</a></li>
+    <li><a href="#test">Test</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section style="border-bottom: 1px solid var(--line);">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-label">Documentación</div>
+      <h1>Friki<em>Tube</em><br>API</h1>
+      <p class="hero-desc">
+        REST API para descargar audio y video de YouTube. Diseñada para bots de WhatsApp con Node.js y Baileys. Sin límites, sin auth.
+      </p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat-grid">
+        <div class="hero-stat">
+          <div class="hero-stat-num">2</div>
+          <div class="hero-stat-label">Endpoints</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">∞</div>
+          <div class="hero-stat-label">Requests</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">0</div>
+          <div class="hero-stat-label">Auth requerida</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num">JSON</div>
+          <div class="hero-stat-label">Formato</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section id="intro">
+  <div class="container">
+    <div class="section-intro">
+      <div class="section-num">01</div>
+      <div class="section-content">
+        <h2>Intro<em>ducción</em></h2>
+        <p class="lead">
+          FrikiTube es una API HTTP construida con Express.js que actúa como intermediario para descargar contenido de YouTube. Recibe una URL y calidad, y devuelve un link directo al archivo procesado.
+        </p>
+        <p class="lead">
+          Todos los endpoints aceptan <strong>POST</strong> con body en <code style="font-family:'DM Mono',monospace;font-size:13px;">application/json</code>. Las respuestas siempre son JSON.
+        </p>
+        <div class="base-url-box">
+          <span class="label">Base URL</span>
+          <span class="url">https://tu-api.onrender.com</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- YTMP3 -->
+<section id="ytmp3" style="border-top:1px solid var(--line);">
+  <div class="container">
+    <div class="ep-section">
+      <div class="section-num">02</div>
+      <div class="section-content">
+
+        <div class="ep-header">
+          <span class="method-pill">POST</span>
+          <span class="ep-path">/api/ytmp3</span>
+        </div>
+
+        <p class="ep-desc">
+          Procesa un video de YouTube y devuelve un link de descarga directo al archivo MP3 en la calidad solicitada. Ideal para el comando <code style="font-family:'DM Mono',monospace">.play</code> o <code style="font-family:'DM Mono',monospace">.yta</code> de tu bot.
+        </p>
+
+        <!-- PARAMS -->
+        <div class="params-label">Parámetros del body</div>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Campo</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url</td>
+              <td style="color:var(--mid);font-size:12px;font-family:'DM Mono',monospace">string</td>
+              <td><span class="tag tag-req">requerido</span></td>
+              <td style="color:var(--mid);font-size:13px;">URL del video de YouTube</td>
+            </tr>
+            <tr>
+              <td>quality</td>
+              <td style="color:var(--mid);font-size:12px;font-family:'DM Mono',monospace">string</td>
+              <td><span class="tag tag-opt">opcional</span></td>
+              <td style="color:var(--mid);font-size:13px;">
+                Default: <code style="font-family:'DM Mono',monospace">320k</code>
+                <div class="values">128k · 192k · 256k · 320k</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- REQUEST + RESPONSE CODE -->
+        <div class="params-label">Request</div>
+        <div class="code-group">
+          <div class="code-panel">
+            <div class="code-panel-head">
+              <span>Node.js — Baileys</span>
+              <button class="copy-btn" onclick="copyEl(this, 'mp3-node')">COPIAR</button>
+            </div>
+            <div class="code-body" id="mp3-node"><span class="s-kw">const</span> axios = <span class="s-fn">require</span>(<span class="s-str">'axios'</span>);
+
+<span class="s-kw">async function</span> <span class="s-fn">ytAudio</span>(url) {
+  <span class="s-kw">const</span> { data } = <span class="s-kw">await</span> axios.<span class="s-fn">post</span>(
+    <span class="s-str">'https://tu-api.onrender.com/api/ytmp3'</span>,
+    {
+      url: url,
+      quality: <span class="s-str">'320k'</span>
+    }
+  );
+  <span class="s-kw">return</span> data; <span class="s-cm">// objeto completo</span>
+}</div>
+          </div>
+          <div class="code-panel">
+            <div class="code-panel-head">
+              <span>cURL</span>
+              <button class="copy-btn" onclick="copyEl(this, 'mp3-curl')">COPIAR</button>
+            </div>
+            <div class="code-body" id="mp3-curl">curl -X POST \
+  https://tu-api.onrender.com/api/ytmp3 \
+  -H <span class="s-str">"Content-Type: application/json"</span> \
+  -d <span class="s-str">'{
+    "url": "https://youtu.be/xxxx",
+    "quality": "320k"
+  }'</span></div>
+          </div>
+        </div>
+
+        <!-- JSON RESPONSE -->
+        <div class="params-label" style="margin-top:32px;">Respuesta JSON</div>
+        <div class="json-resp">
+          <div class="json-resp-head">
+            <span>200 OK — application/json</span>
+            <button class="copy-btn" onclick="copyEl(this, 'mp3-resp')" style="border-color:#999;color:var(--mid)">COPIAR</button>
+          </div>
+          <div class="json-body" id="mp3-resp">{
+  <span class="s-key">"success"</span>:   <span class="s-bool">true</span>,
+  <span class="s-key">"title"</span>:     <span class="s-str">"Nombre del video"</span>,
+  <span class="s-key">"author"</span>:    <span class="s-str">"Nombre del canal"</span>,
+  <span class="s-key">"duration"</span>:  <span class="s-num">240</span>,           <span class="s-cm">// segundos</span>
+  <span class="s-key">"type"</span>:      <span class="s-str">"audio"</span>,
+  <span class="s-key">"format"</span>:    <span class="s-str">"mp3"</span>,
+  <span class="s-key">"quality"</span>:   <span class="s-str">"320k"</span>,
+  <span class="s-key">"thumbnail"</span>: <span class="s-str">"https://i.ytimg.com/vi/xxxx/hq720.jpg"</span>,
+  <span class="s-key">"filesize"</span>:  <span class="s-num">9437184</span>,      <span class="s-cm">// bytes</span>
+  <span class="s-key">"dl"</span>:        <span class="s-str">"https://enlace-directo-al-archivo.mp3"</span>
+}</div>
+        </div>
+
+        <div class="resp-fields">
+          <div class="resp-field">
+            <div class="rf-name">success</div>
+            <div class="rf-type">boolean</div>
+            <div class="rf-desc">true si se procesó bien</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">title</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Título del video</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">author</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Canal / artista</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">duration</div>
+            <div class="rf-type">number</div>
+            <div class="rf-desc">Duración en segundos</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">quality</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Calidad procesada</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">thumbnail</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">URL de la miniatura</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">filesize</div>
+            <div class="rf-type">number</div>
+            <div class="rf-desc">Tamaño en bytes</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">dl</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Link directo al MP3 ⬅︎</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- YTMP4 -->
+<section id="ytmp4" style="border-top:1px solid var(--line);">
+  <div class="container">
+    <div class="ep-section">
+      <div class="section-num">03</div>
+      <div class="section-content">
+
+        <div class="ep-header">
+          <span class="method-pill">POST</span>
+          <span class="ep-path">/api/ytmp4</span>
+        </div>
+
+        <p class="ep-desc">
+          Procesa un video de YouTube y devuelve un link de descarga directo al archivo MP4 en la resolución solicitada. Ideal para el comando <code style="font-family:'DM Mono',monospace">.ytv</code> de tu bot.
+        </p>
+
+        <div class="params-label">Parámetros del body</div>
+        <table class="params-table">
+          <thead>
+            <tr>
+              <th>Campo</th>
+              <th>Tipo</th>
+              <th>Estado</th>
+              <th>Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>url</td>
+              <td style="color:var(--mid);font-size:12px;font-family:'DM Mono',monospace">string</td>
+              <td><span class="tag tag-req">requerido</span></td>
+              <td style="color:var(--mid);font-size:13px;">URL del video de YouTube</td>
+            </tr>
+            <tr>
+              <td>quality</td>
+              <td style="color:var(--mid);font-size:12px;font-family:'DM Mono',monospace">string</td>
+              <td><span class="tag tag-opt">opcional</span></td>
+              <td style="color:var(--mid);font-size:13px;">
+                Default: <code style="font-family:'DM Mono',monospace">720p</code>
+                <div class="values">360p · 480p · 720p · 1080p</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="params-label">Request</div>
+        <div class="code-group">
+          <div class="code-panel">
+            <div class="code-panel-head">
+              <span>Node.js — Baileys</span>
+              <button class="copy-btn" onclick="copyEl(this, 'mp4-node')">COPIAR</button>
+            </div>
+            <div class="code-body" id="mp4-node"><span class="s-kw">const</span> axios = <span class="s-fn">require</span>(<span class="s-str">'axios'</span>);
+
+<span class="s-kw">async function</span> <span class="s-fn">ytVideo</span>(url) {
+  <span class="s-kw">const</span> { data } = <span class="s-kw">await</span> axios.<span class="s-fn">post</span>(
+    <span class="s-str">'https://tu-api.onrender.com/api/ytmp4'</span>,
+    {
+      url: url,
+      quality: <span class="s-str">'720p'</span>
+    }
+  );
+  <span class="s-kw">return</span> data; <span class="s-cm">// objeto completo</span>
+}</div>
+          </div>
+          <div class="code-panel">
+            <div class="code-panel-head">
+              <span>cURL</span>
+              <button class="copy-btn" onclick="copyEl(this, 'mp4-curl')">COPIAR</button>
+            </div>
+            <div class="code-body" id="mp4-curl">curl -X POST \
+  https://tu-api.onrender.com/api/ytmp4 \
+  -H <span class="s-str">"Content-Type: application/json"</span> \
+  -d <span class="s-str">'{
+    "url": "https://youtu.be/xxxx",
+    "quality": "720p"
+  }'</span></div>
+          </div>
+        </div>
+
+        <div class="params-label" style="margin-top:32px;">Respuesta JSON</div>
+        <div class="json-resp">
+          <div class="json-resp-head">
+            <span>200 OK — application/json</span>
+            <button class="copy-btn" onclick="copyEl(this, 'mp4-resp')" style="border-color:#999;color:var(--mid)">COPIAR</button>
+          </div>
+          <div class="json-body" id="mp4-resp">{
+  <span class="s-key">"success"</span>:   <span class="s-bool">true</span>,
+  <span class="s-key">"title"</span>:     <span class="s-str">"Nombre del video"</span>,
+  <span class="s-key">"author"</span>:    <span class="s-str">"Nombre del canal"</span>,
+  <span class="s-key">"duration"</span>:  <span class="s-num">240</span>,           <span class="s-cm">// segundos</span>
+  <span class="s-key">"type"</span>:      <span class="s-str">"video"</span>,
+  <span class="s-key">"format"</span>:    <span class="s-str">"mp4"</span>,
+  <span class="s-key">"quality"</span>:   <span class="s-str">"720p"</span>,
+  <span class="s-key">"thumbnail"</span>: <span class="s-str">"https://i.ytimg.com/vi/xxxx/hq720.jpg"</span>,
+  <span class="s-key">"filesize"</span>:  <span class="s-num">52428800</span>,     <span class="s-cm">// bytes</span>
+  <span class="s-key">"dl"</span>:        <span class="s-str">"https://enlace-directo-al-archivo.mp4"</span>
+}</div>
+        </div>
+
+        <div class="resp-fields">
+          <div class="resp-field">
+            <div class="rf-name">success</div>
+            <div class="rf-type">boolean</div>
+            <div class="rf-desc">true si se procesó bien</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">title</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Título del video</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">author</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Canal / creador</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">duration</div>
+            <div class="rf-type">number</div>
+            <div class="rf-desc">Duración en segundos</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">quality</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Resolución procesada</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">thumbnail</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">URL de la miniatura</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">filesize</div>
+            <div class="rf-type">number</div>
+            <div class="rf-desc">Tamaño en bytes</div>
+          </div>
+          <div class="resp-field">
+            <div class="rf-name">dl</div>
+            <div class="rf-type">string</div>
+            <div class="rf-desc">Link directo al MP4 ⬅︎</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEST -->
+<section id="test" style="border-top:1px solid var(--line);">
+  <div class="container">
+    <div class="test-section">
+      <div class="section-num">04</div>
+      <div class="section-content">
+        <h2>Test de<br><em>Conexión</em></h2>
+        <p class="lead" style="margin-bottom:28px;">
+          Verificá que tu instancia de la API esté activa llamando al endpoint <code style="font-family:'DM Mono',monospace">/ping</code>.
+        </p>
+        <div class="test-box">
+          <h3>Ping <em>/ Test</em></h3>
+          <p>Ingresá la URL base de tu API deployada en Render</p>
+          <input
+            class="test-input"
+            id="apiUrl"
+            type="text"
+            value="http://localhost:3000"
+            placeholder="https://tu-api.onrender.com"
+          />
+          <button class="test-btn" id="testBtn" onclick="runTest()">
+            <span id="btnSpinner" style="display:none">···</span>
+            <span id="btnLabel">Ejecutar Test</span>
+          </button>
+          <div class="test-result" id="testResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="border-top:1.5px solid var(--black);margin-top:0;">
+  <div class="container">
+    <footer>
+      <span><strong>FrikiTube API</strong> — by FrikiBot</span>
+      <span>Express.js · Node.js · Sin auth · Uso ilimitado</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx+'px'; cursor.style.top = my+'px'; });
+function animRing() { rx += (mx-rx)*0.12; ry += (my-ry)*0.12; ring.style.left = rx+'px'; ring.style.top = ry+'px'; requestAnimationFrame(animRing); }
+animRing();
+
+// Copy
+function copyEl(btn, id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText.trim()).then(() => {
+    btn.textContent = 'COPIADO';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'COPIAR'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// Test
+async function runTest() {
+  const btn = document.getElementById('testBtn');
+  const label = document.getElementById('btnLabel');
+  const spinner = document.getElementById('btnSpinner');
+  const result = document.getElementById('testResult');
+  const base = document.getElementById('apiUrl').value.replace(/\/$/, '');
+
+  btn.disabled = true;
+  label.textContent = 'Conectando';
+  spinner.style.display = 'inline';
+  result.className = 'test-result';
+
+  const t = Date.now();
+  try {
+    const res = await fetch(`${base}/ping`, { signal: AbortSignal.timeout(8000) });
+    const ms = Date.now() - t;
+    const json = await res.json();
+    if (res.ok && json.status === 'ok') {
+      result.className = 'test-result ok show';
+      result.innerHTML = `✓ API activa — ${json.message}<br><span style="color:var(--mid)">${ms}ms · ${base}/ping</span>`;
+    } else { throw new Error(`HTTP ${res.status}`); }
+  } catch(e) {
+    const ms = Date.now() - t;
+    result.className = 'test-result err show';
+    result.innerHTML = `✗ Sin respuesta — ${e.name === 'TimeoutError' ? 'Timeout (8s)' : e.message}<br><span style="color:var(--mid)">${ms}ms · ${base}/ping</span>`;
+  }
+
+  btn.disabled = false;
+  label.textContent = 'Ejecutar Test';
+  spinner.style.display = 'none';
+}
+</script>
+</body>
+</html>
